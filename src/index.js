@@ -10,6 +10,7 @@ import AudioRecord from './component/audio-record';
 import Websocket from './common/socket';
 import {API_URL, api_common} from './common/api';
 import {Overlay} from 'teaset';
+import Button from './component/button';
 
 const App = () => {
   const websocketRef = useRef(null);
@@ -26,7 +27,7 @@ const App = () => {
       data: data,
       type: 0,
     };
-    console.log('payload', payload);
+    // console.log('payload', payload);
     websocketRef.current?.send(payload);
   };
 
@@ -40,29 +41,18 @@ const App = () => {
     console.log('message data', data);
   };
 
-  const Button = ({title, onPress, style}) => {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        style={[styles.center, styles.openRecord, {...style}]}
-        onPress={onPress}>
-        <Text style={styles.text}>{title}</Text>
-      </TouchableOpacity>
-    );
-  };
   const AudioOverlay = (
-    <Overlay.PullView style={styles.center} ref={overlayRef}>
-      <View style={styles.overlay}>
-        <AudioRecord onRecordData={onRecordData} />
-        <Button
-          title="挂断"
-          style={{backgroundColor: 'red'}}
-          onPress={() => {
-            // Overlay.show(AudioOverlay);
-            overlayRef.current?.close();
-          }}
-        />
-      </View>
+    <Overlay.PullView
+      // modal={true}
+      side="left"
+      style={[{alignItems: 'center', justifyContent: 'center'}]}
+      ref={overlayRef}>
+      <AudioRecord
+        onRecordData={onRecordData}
+        onClose={() => {
+          overlayRef.current?.close();
+        }}
+      />
     </Overlay.PullView>
   );
 
@@ -76,6 +66,7 @@ const App = () => {
             onPress={() => {
               Overlay.show(AudioOverlay);
             }}
+            fixed={true}
           />
         </View>
       </View>

@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "ahooks": "^2.8.1",
+    "moment": "^2.29.1",
     "react": "16.13.1",
     "react-native": "0.63.3",
     "react-native-audio-record": "^0.2.2",
+    "react-native-centerm-sdk": "^1.2.4",
     "teaset": "^0.7.5"
   },
   "devDependencies": {
