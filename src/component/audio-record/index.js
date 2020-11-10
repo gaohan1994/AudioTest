@@ -3,7 +3,7 @@
  * @Author: centerm.gaohan
  * @Date: 2020-10-23 14:45:23
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2020-11-09 14:28:02
+ * @Last Modified time: 2020-11-10 10:39:10
  */
 import React, {useEffect, useState} from 'react';
 import {useMount} from 'ahooks';
@@ -116,6 +116,7 @@ const Audio = (props) => {
           const {title, onPress, ...rest} = item;
           return (
             <Button
+              key={title}
               {...rest}
               title={title}
               onPress={onPress ? onPress : () => {}}
