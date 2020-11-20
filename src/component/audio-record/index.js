@@ -3,7 +3,7 @@
  * @Author: centerm.gaohan
  * @Date: 2020-10-23 14:45:23
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2020-11-20 14:30:56
+ * @Last Modified time: 2020-11-20 14:41:09
  */
 import React, {useEffect, useState} from 'react';
 import {useMount} from 'ahooks';
@@ -95,7 +95,7 @@ const Audio = (props) => {
   const onStop = async () => {
     setRecordStatus(AudioStatus.stop);
     const filePath = await AudioRecord.stop();
-    console.log('filePath', filePath);
+    onClose(filePath);
   };
 
   const buttons = [
@@ -108,7 +108,7 @@ const Audio = (props) => {
       style: {backgroundColor: 'red'},
       onPress: () => {
         Toast.info('通信结束');
-        onClose();
+        onStop();
       },
     },
     {

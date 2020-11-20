@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   StyleSheet,
   View,
@@ -13,10 +13,14 @@ import Websocket from './common/socket';
 import {API_URL, api_common} from './common/api';
 import {Overlay} from 'teaset';
 import Button from './component/button';
+import AudioPlayModal from './component/audio-play';
 
 const App = () => {
   const websocketRef = useRef(null);
   const overlayRef = useRef(null);
+
+  const [visible, setVisible] = useState(false);
+  const [audioUrl, setAudioUrl] = useState('');
 
   useMount(async () => {
     await PermissionsAndroid.requestMultiple([
@@ -57,7 +61,13 @@ const App = () => {
       ref={overlayRef}>
       <AudioRecord
         onRecordData={onRecordData}
-        onClose={() => {
+        onClose={(audioFilePath) => {
+          if (audioFilePath) {
+            console.log('audioFilePath', typeof audioFilePath);
+            console.log('audioFilePath', audioFilePath);
+            setAudioUrl(audioFilePath);
+            setVisible(true);
+          }
           overlayRef.current?.close();
         }}
       />
@@ -83,6 +93,11 @@ const App = () => {
         </View>
       </View>
 
+      <AudioPlayModal
+        visible={visible}
+        setVisible={setVisible}
+        url={audioUrl}
+      />
       <Websocket
         ref={websocketRef}
         url={API_URL.send}
