@@ -11,7 +11,7 @@ const Button = ({title, onPress, fixed = false, style}) => {
         fixed ? styles.openRecord : {},
         {...style},
       ]}
-      onPress={onPress}>
+      onPress={() => onPress()}>
       <Text style={styles.text}>{title}</Text>
     </TouchableOpacity>
   );

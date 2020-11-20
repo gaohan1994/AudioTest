@@ -3,16 +3,22 @@
  * @Author: centerm.gaohan
  * @Date: 2020-10-23 14:45:23
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2020-11-10 10:39:10
+ * @Last Modified time: 2020-11-20 14:30:56
  */
 import React, {useEffect, useState} from 'react';
 import {useMount} from 'ahooks';
-import {View, Text, StyleSheet, Image} from 'react-native';
+import {View, Text, StyleSheet, Image, StatusBar} from 'react-native';
 import AudioRecord from 'react-native-audio-record';
 import {Toast} from 'teaset';
 import {ScreenUtil} from 'react-native-centerm-sdk';
 import Button from '../button';
 import iconboc from '../../asset/boc.jpeg';
+import moment from 'moment';
+
+function formatDouble(data) {
+  const time = String(data);
+  return time.length === 1 ? `0${time}` : time;
+}
 
 const AudioStatus = {
   record: 'record',
@@ -28,15 +34,34 @@ const Audio = (props) => {
   const [option, setOption] = useState({});
   // 当前录音状态 record stop
   const [recordStatus, setRecordStatus] = useState('');
-  // 通话时长
-  const [] = useState('');
+  // 通话时长/秒
+  const [connectSeconds, setConnectSeconds] = useState(0);
+  // 通话时长str
+  const [connectSecondsStr, setConnectSecondsStr] = useState('');
   // 通讯次数
   const [socketTimes, setSocketTimes] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setConnectSeconds((prevSec) => prevSec + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const duration = moment.duration(connectSeconds, 'seconds');
+    const durationString = [
+      formatDouble(duration.hours()),
+      formatDouble(duration.minutes()),
+      formatDouble(duration.seconds()),
+    ].join(':');
+    setConnectSecondsStr(durationString);
+  }, [connectSeconds]);
 
   // 校验是否有权限
   // 进入的时候开启
   useMount(() => {
-    console.log('1');
     const options = {
       sampleRate: 16000, // default 44100
       channels: 1, // 1 or 2, default 1
@@ -52,9 +77,8 @@ const Audio = (props) => {
      */
     AudioRecord.on('data', (data) => {
       if (onRecordData) {
-        // onRecordData(data);
-
-        setSocketTimes((prevTimes) => prevTimes + 1);
+        onRecordData(data);
+        // setSocketTimes((prevTimes) => prevTimes + 1);
       }
     });
 
@@ -63,7 +87,6 @@ const Audio = (props) => {
 
   // 开始录音
   const onRecord = () => {
-    console.log('setRecordStatus');
     setRecordStatus(AudioStatus.record);
     AudioRecord.start();
   };
@@ -84,6 +107,7 @@ const Audio = (props) => {
       title: '挂断',
       style: {backgroundColor: 'red'},
       onPress: () => {
+        Toast.info('通信结束');
         onClose();
       },
     },
@@ -93,8 +117,14 @@ const Audio = (props) => {
     },
   ];
 
+  console.log(moment.duration(connectSeconds, 'seconds'));
+
   return (
     <View style={styles.container}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="rgba(0, 0, 0, 0.5)"
+      />
       <View style={styles.content}>
         <Image source={iconboc} style={styles.img} />
         <Text style={styles.name}>升腾 数字人</Text>
@@ -108,7 +138,8 @@ const Audio = (props) => {
         <Text style={styles.text}>采样器：{option.sampleRate}</Text>
         <Text style={styles.text}>位采样：{option.bitsPerSample}</Text>
         <Text style={styles.text}>文件名：{option.wavFile}</Text>
-        <Text style={styles.text}>通讯次数：{socketTimes}</Text>
+        <Text style={styles.text}>通信时长：{connectSecondsStr}</Text>
+        {/* <Text style={styles.text}>通讯次数：{socketTimes}</Text> */}
       </View>
 
       <View style={styles.buttons}>

@@ -5,7 +5,9 @@ import {
   Text,
   StatusBar,
   TouchableOpacity,
+  PermissionsAndroid,
 } from 'react-native';
+import {useMount} from 'ahooks';
 import AudioRecord from './component/audio-record';
 import Websocket from './common/socket';
 import {API_URL, api_common} from './common/api';
@@ -15,6 +17,12 @@ import Button from './component/button';
 const App = () => {
   const websocketRef = useRef(null);
   const overlayRef = useRef(null);
+
+  useMount(async () => {
+    await PermissionsAndroid.requestMultiple([
+      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+    ]);
+  });
 
   const onRecordData = (data) => {
     const payload = {
@@ -58,12 +66,16 @@ const App = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" backgroundColor="#fff" />
       <View style={{flex: 1}}>
         <View style={styles.container}>
+          <View>
+            <Text>数字人App Demo</Text>
+          </View>
           <Button
             title="通信"
             onPress={() => {
+              console.log('hello');
               Overlay.show(AudioOverlay);
             }}
             fixed={true}
