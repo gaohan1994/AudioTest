@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useRef, useState, useEffect} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,46 +6,58 @@ import {
   StatusBar,
   TouchableOpacity,
   PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import {useMount} from 'ahooks';
 import AudioRecord from './component/audio-record';
 import Websocket from './common/socket';
 import {API_URL, api_common} from './common/api';
 import {Overlay} from 'teaset';
-import Button from './component/button';
+// import Button from './component/button';
+import ButtonView from './pages/view';
 import AudioPlayModal from './component/audio-play';
+import Toast from 'teaset/components/Toast/Toast';
+import Modal from 'react-native-modal';
+// import WebsocketDM from './common/socket-t';
 
 const App = () => {
   const websocketRef = useRef(null);
-  const overlayRef = useRef(null);
 
   const [visible, setVisible] = useState(false);
   const [audioUrl, setAudioUrl] = useState('');
 
   useMount(async () => {
-    await PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-    ]);
+    if (Platform.OS === 'android') {
+      await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      ]);
+    }
   });
 
   const onRecordData = (data) => {
     const payload = {
       ...api_common(),
       token: 'token',
-      last: true,
-      vcn: 'Gh',
+      last: false,
+      vcn: 'xiaozhang',
       spd: 50,
       vol: 50,
       data: data,
       type: 0,
     };
-    // console.log('payload', payload);
+    // const payloadString = JSON.stringify(payload);
+    console.log('payload', payload);
+    // const client = WebsocketDM.getInstance();
+    // console.log('client', client);
+    // client?.sendMessage(payloadString);
+    // console.log(payloadString);
+    // console.log('websocketRef.current', websocketRef.current);
     websocketRef.current?.send(payload);
   };
 
   const onopen = (event) => {
     console.log('onopen');
-    console.log('event', event);
+    Toast.info('socket 已连接');
   };
 
   const onmessage = (event) => {
@@ -53,26 +65,26 @@ const App = () => {
     console.log('message data', data);
   };
 
-  const AudioOverlay = (
-    <Overlay.PullView
-      // modal={true}
-      side="left"
-      style={[{alignItems: 'center', justifyContent: 'center'}]}
-      ref={overlayRef}>
-      <AudioRecord
-        onRecordData={onRecordData}
-        onClose={(audioFilePath) => {
-          if (audioFilePath) {
-            console.log('audioFilePath', typeof audioFilePath);
-            console.log('audioFilePath', audioFilePath);
-            setAudioUrl(audioFilePath);
-            setVisible(true);
-          }
-          overlayRef.current?.close();
-        }}
-      />
-    </Overlay.PullView>
-  );
+  // const AudioOverlay = (
+  //   <Overlay.PullView
+  //     // modal={true}
+  //     side="left"
+  //     style={[{alignItems: 'center', justifyContent: 'center'}]}
+  //     ref={overlayRef}>
+  //     <AudioRecord
+  //       onRecordData={(data) => onRecordData(data)}
+  //       onClose={(audioFilePath) => {
+  //         if (audioFilePath) {
+  //           // console.log('audioFilePath', typeof audioFilePath);
+  //           // console.log('audioFilePath', audioFilePath);
+  //           setAudioUrl(audioFilePath);
+  //           setVisible(true);
+  //         }
+  //         overlayRef.current?.close();
+  //       }}
+  //     />
+  //   </Overlay.PullView>
+  // );
 
   return (
     <View style={styles.container}>
@@ -82,13 +94,16 @@ const App = () => {
           <View>
             <Text>数字人App Demo</Text>
           </View>
-          <Button
-            title="通信"
-            onPress={() => {
-              console.log('hello');
-              Overlay.show(AudioOverlay);
+          <ButtonView
+            onRecordData={(data) => onRecordData(data)}
+            onClose={(audioFilePath) => {
+              if (audioFilePath) {
+                // console.log('audioFilePath', typeof audioFilePath);
+                // console.log('audioFilePath', audioFilePath);
+                setAudioUrl(audioFilePath);
+                setVisible(true);
+              }
             }}
-            fixed={true}
           />
         </View>
       </View>
@@ -99,10 +114,21 @@ const App = () => {
         url={audioUrl}
       />
       <Websocket
+        reconnect={true}
         ref={websocketRef}
         url={API_URL.send}
-        onOpen={onopen}
-        onMessage={onmessage}
+        onOpen={(data) => {
+          console.log('onopen');
+          onopen(data);
+        }}
+        onMessage={(data) => {
+          console.log('onmessage');
+          onmessage(data);
+        }}
+        onClose={() => {
+          Toast.sad('socket 已关闭');
+          console.log('onclose');
+        }}
       />
     </View>
   );

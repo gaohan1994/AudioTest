@@ -3,7 +3,7 @@
  * @Author: centerm.gaohan
  * @Date: 2020-10-23 14:45:23
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2020-11-20 14:41:09
+ * @Last Modified time: 2020-11-30 17:27:39
  */
 import React, {useEffect, useState} from 'react';
 import {useMount} from 'ahooks';
@@ -116,8 +116,6 @@ const Audio = (props) => {
       style: {backgroundColor: 'rgba(0, 0, 0, 0.6)'},
     },
   ];
-
-  console.log(moment.duration(connectSeconds, 'seconds'));
 
   return (
     <View style={styles.container}>

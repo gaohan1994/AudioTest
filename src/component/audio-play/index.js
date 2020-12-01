@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Modal from 'react-native-modal';
 import {View, Text} from 'react-native';
 import {Button} from 'react-native-centerm-sdk';
@@ -7,6 +7,8 @@ import {Toast} from 'teaset';
 
 export default (props) => {
   const {visible, setVisible, url} = props;
+
+  const [audio, setAudio] = useState({});
 
   const onPlayAudio = () => {
     console.log('url', url);
@@ -27,6 +29,8 @@ export default (props) => {
         });
       }, 100);
     });
+
+    setAudio(sound);
   };
 
   return (
@@ -46,7 +50,12 @@ export default (props) => {
             size="normal"
             style={{marginRight: 10}}
             title="取消"
-            onPress={() => setVisible(false)}
+            onPress={() => {
+              if (audio && audio.stop) {
+                audio.stop();
+              }
+              setVisible(false);
+            }}
           />
           <Button size="normal" title="播放" onPress={() => onPlayAudio()} />
         </View>
