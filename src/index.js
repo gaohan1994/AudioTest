@@ -39,18 +39,18 @@ const App = () => {
       ...api_common(),
       token: 'token',
       last: false,
-      vcn: 'xiaozhang',
+      vcn: 'xiaoyuan',
       spd: 50,
       vol: 50,
       data: data,
       type: 0,
     };
-    // const payloadString = JSON.stringify(payload);
+    const payloadString = JSON.stringify(payload);
     console.log('payload', payload);
     // const client = WebsocketDM.getInstance();
     // console.log('client', client);
     // client?.sendMessage(payloadString);
-    // console.log(payloadString);
+    console.log(payloadString);
     // console.log('websocketRef.current', websocketRef.current);
     websocketRef.current?.send(payload);
   };
