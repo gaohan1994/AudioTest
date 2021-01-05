@@ -12,3 +12,9 @@ export const api_common = () => {
     },
   };
 };
+
+export const queryQuestion = () => {
+  return fetch('https://wepay.test.bankcomm.com/crsp-ar-dev/queryVoice.ajax', {
+    method: 'GET',
+  }).then((res) => res.json());
+};

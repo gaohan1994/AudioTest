@@ -3,7 +3,7 @@
  * @Author: centerm.gaohan
  * @Date: 2020-10-23 14:45:23
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2020-12-09 16:43:57
+ * @Last Modified time: 2021-01-05 16:33:11
  */
 import React, {useEffect, useState} from 'react';
 import {useMount} from 'ahooks';
@@ -14,6 +14,7 @@ import {ScreenUtil} from 'react-native-centerm-sdk';
 import Button from '../button';
 import iconboc from '../../asset/boc.jpeg';
 import moment from 'moment';
+import CostomerView from '../costomer-view';
 
 function formatDouble(data) {
   const time = String(data);
@@ -123,7 +124,9 @@ const Audio = (props) => {
         barStyle="light-content"
         backgroundColor="rgba(0, 0, 0, 0.5)"
       />
-      <View style={styles.content}>
+
+      <CostomerView />
+      {/* <View style={styles.content}>
         <Image source={iconboc} style={styles.img} />
         <Text style={styles.name}>升腾 数字人</Text>
 
@@ -137,8 +140,7 @@ const Audio = (props) => {
         <Text style={styles.text}>位采样：{option.bitsPerSample}</Text>
         <Text style={styles.text}>文件名：{option.wavFile}</Text>
         <Text style={styles.text}>通信时长：{connectSecondsStr}</Text>
-        {/* <Text style={styles.text}>通讯次数：{socketTimes}</Text> */}
-      </View>
+      </View> */}
 
       <View style={styles.buttons}>
         {buttons.map((item) => {

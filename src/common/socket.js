@@ -2,7 +2,7 @@
  * @Author: centerm.gaozhiying
  * @Date: 2020-04-08 11:09:02
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2020-12-14 10:13:51
+ * @Last Modified time: 2021-01-05 16:11:08
  *
  * @todo 封装的websocket
  */
@@ -35,7 +35,6 @@ class WS extends React.PureComponent {
   };
 
   componentDidMount() {
-    console.log('componentDidMount');
     this.reconnect = !!this.props.reconnect;
     this._handleWebSocketSetup();
   }
@@ -68,15 +67,12 @@ class WS extends React.PureComponent {
       }
     };
     ws.onerror = (error) => {
-      console.log('onerror', error);
-      console.log('error message ', error.message);
       if (this.props.onError) {
         this.props.onError(error);
       }
     };
     ws.onclose = (data) => {
       if (this.reconnect) {
-        console.log('this.reconnect', this.reconnect);
         this._handleWebSocketSetup();
       } else {
         this.props.onClose && this.props.onClose(data);
