@@ -2,7 +2,7 @@
  * @Author: centerm.gaozhiying
  * @Date: 2020-04-08 11:09:02
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2021-01-05 16:11:08
+ * @Last Modified time: 2021-01-08 14:45:38
  *
  * @todo 封装的websocket
  */
@@ -12,6 +12,7 @@ import React from 'react';
 class WS extends React.PureComponent {
   static defaultProps = {
     reconnect: false,
+    // timeout: 3 * 1000,
   };
 
   constructor(props) {
@@ -39,13 +40,13 @@ class WS extends React.PureComponent {
     this._handleWebSocketSetup();
   }
 
-  // componentWillUnmount() {
-  //   this.reconnect = false;
+  componentWillUnmount() {
+    this.reconnect = false;
 
-  //   if (this.state.ws) {
-  //     this.state.ws.close();
-  //   }
-  // }
+    if (this.state.ws) {
+      this.state.ws.close();
+    }
+  }
 
   render() {
     return null;
@@ -73,7 +74,9 @@ class WS extends React.PureComponent {
     };
     ws.onclose = (data) => {
       if (this.reconnect) {
-        this._handleWebSocketSetup();
+        setTimeout(() => {
+          this._handleWebSocketSetup();
+        }, 3000);
       } else {
         this.props.onClose && this.props.onClose(data);
       }

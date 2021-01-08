@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
-import {queryQuestion} from '../../common/api';
 import {ScreenUtil} from 'react-native-centerm-sdk';
 import {merge} from 'lodash';
 
@@ -27,16 +26,20 @@ class CostomerView extends React.Component {
   }
 
   fetchList = () => {
-    queryQuestion().then((result) => {
-      const {RSP_BODY} = result;
-      const {question} = RSP_BODY;
-      const {renderQuestionList} = this.state;
-      if (question) {
-        let nextQuestionList = merge([], renderQuestionList);
-        nextQuestionList = nextQuestionList.concat(question);
-        this.setState({renderQuestionList: nextQuestionList});
-      }
-    });
+    const {queryQuestion} = this.props;
+
+    if (queryQuestion) {
+      queryQuestion().then((result) => {
+        const {RSP_BODY} = result;
+        const {question} = RSP_BODY;
+        const {renderQuestionList} = this.state;
+        if (question) {
+          let nextQuestionList = merge([], renderQuestionList);
+          nextQuestionList = nextQuestionList.concat(question);
+          this.setState({renderQuestionList: nextQuestionList});
+        }
+      });
+    }
   };
 
   render() {
@@ -83,7 +86,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
-    paddingTop: 64,
+    // paddingTop: 64,
   },
   text: {
     fontSize: 14,

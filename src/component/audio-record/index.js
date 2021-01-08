@@ -3,68 +3,76 @@
  * @Author: centerm.gaohan
  * @Date: 2020-10-23 14:45:23
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2021-01-05 16:33:11
+ * @Last Modified time: 2021-01-08 15:41:12
  */
-import React, {useEffect, useState} from 'react';
+import React, {useState, useRef} from 'react';
 import {useMount} from 'ahooks';
-import {View, Text, StyleSheet, Image, StatusBar} from 'react-native';
+import {View, Text, StyleSheet, StatusBar} from 'react-native';
 import AudioRecord from 'react-native-audio-record';
 import {Toast} from 'teaset';
 import {ScreenUtil} from 'react-native-centerm-sdk';
 import Button from '../button';
-import iconboc from '../../asset/boc.jpeg';
-import moment from 'moment';
 import CostomerView from '../costomer-view';
-
-function formatDouble(data) {
-  const time = String(data);
-  return time.length === 1 ? `0${time}` : time;
-}
+import Websocket from '../../common/socket';
+import {api_common} from '../../common/api';
+import {useSelector} from 'react-redux';
 
 const AudioStatus = {
   record: 'record',
   stop: 'stop',
 };
 
+const SocketStatus = {
+  open: 'open',
+  error: 'error',
+  close: 'close',
+};
+
 const Audio = (props) => {
+  const websocketRef = useRef(null);
   /**
    * @param {onRecordData} 监控数据
    */
-  const {onRecordData, onClose} = props;
+  const {onClose} = props;
   // options
   const [option, setOption] = useState({});
   // 当前录音状态 record stop
   const [recordStatus, setRecordStatus] = useState('');
-  // 通话时长/秒
-  const [connectSeconds, setConnectSeconds] = useState(0);
-  // 通话时长str
-  const [connectSecondsStr, setConnectSecondsStr] = useState('');
-  // 通讯次数
-  const [socketTimes, setSocketTimes] = useState(0);
+  // socket的状态
+  const [socketStatus, setSocketStatus] = useState(SocketStatus.close);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setConnectSeconds((prevSec) => prevSec + 1);
-    }, 1000);
+  const state = useSelector((state) => state.apiStore);
+  console.log('[state]', state);
 
-    return () => clearInterval(timer);
-  }, []);
+  const queryQuestion = () => {
+    return fetch(state.query_url, {
+      method: 'GET',
+    }).then((res) => res.json());
+  };
 
-  useEffect(() => {
-    const duration = moment.duration(connectSeconds, 'seconds');
-    const durationString = [
-      formatDouble(duration.hours()),
-      formatDouble(duration.minutes()),
-      formatDouble(duration.seconds()),
-    ].join(':');
-    setConnectSecondsStr(durationString);
-  }, [connectSeconds]);
+  const onRecordData = (data) => {
+    const payload = {
+      ...api_common(),
+      token: 'token',
+      last: false,
+      vcn: 'xiaoyuan',
+      spd: 50,
+      vol: 50,
+      data: data,
+      type: 0,
+    };
+    const payloadString = JSON.stringify(payload);
+    // console.log('payload', payload);
+    console.log(payloadString);
+    // console.log('websocketRef.current', websocketRef.current);
+    websocketRef.current?.send(payload);
+  };
 
   // 校验是否有权限
   // 进入的时候开启
   useMount(() => {
     const options = {
-      sampleRate: 16000, // default 44100
+      sampleRate: 44100, // default 44100
       channels: 1, // 1 or 2, default 1
       bitsPerSample: 16, // 8 or 16, default 16
       audioSource: 6, // android only (see below)
@@ -82,8 +90,6 @@ const Audio = (props) => {
         // setSocketTimes((prevTimes) => prevTimes + 1);
       }
     });
-
-    onRecord();
   });
 
   // 开始录音
@@ -118,6 +124,13 @@ const Audio = (props) => {
     },
   ];
 
+  // 开始录音
+  const onSocketOpen = () => {
+    Toast.info('socket连接成功');
+    setSocketStatus(SocketStatus.open);
+    onRecord();
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -125,22 +138,19 @@ const Audio = (props) => {
         backgroundColor="rgba(0, 0, 0, 0.5)"
       />
 
-      <CostomerView />
-      {/* <View style={styles.content}>
-        <Image source={iconboc} style={styles.img} />
-        <Text style={styles.name}>升腾 数字人</Text>
-
+      <View style={styles.content}>
         <Text style={[styles.text, {marginTop: 10, marginBottom: 5}]}>
-          测试信息
+          {socketStatus === SocketStatus.open
+            ? 'socket已连接'
+            : socketStatus === SocketStatus.error
+            ? 'socket报错'
+            : socketStatus === SocketStatus.close
+            ? 'socket未关闭'
+            : ''}
+          {recordStatus === AudioStatus.record ? '  正在录音' : '  录音未开始'}
         </Text>
-        <Text style={styles.text}>
-          {recordStatus === AudioStatus.record ? '正在录音' : '未开始'}
-        </Text>
-        <Text style={styles.text}>采样器：{option.sampleRate}</Text>
-        <Text style={styles.text}>位采样：{option.bitsPerSample}</Text>
-        <Text style={styles.text}>文件名：{option.wavFile}</Text>
-        <Text style={styles.text}>通信时长：{connectSecondsStr}</Text>
-      </View> */}
+      </View>
+      <CostomerView queryQuestion={queryQuestion} />
 
       <View style={styles.buttons}>
         {buttons.map((item) => {
@@ -155,6 +165,23 @@ const Audio = (props) => {
           );
         })}
       </View>
+
+      <Websocket
+        reconnect={true}
+        ref={websocketRef}
+        url={state.send}
+        onOpen={(data) => {
+          onSocketOpen();
+        }}
+        onClose={() => {
+          Toast.sad('socket 已关闭');
+          console.log('onclose');
+        }}
+        onError={(error) => {
+          Toast.sad('socket 报错');
+          console.log('error: ', error);
+        }}
+      />
     </View>
   );
 };
@@ -166,7 +193,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   text: {
-    fontSize: 12,
+    fontSize: 14,
+    marginBottom: 5,
     color: '#fff',
   },
   buttons: {
@@ -179,11 +207,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   content: {
-    flex: 1,
     width: ScreenUtil.screenWidth,
     flexDirection: 'column',
-    alignItems: 'center',
-    paddingTop: 100,
+    paddingTop: 64,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   img: {
     width: ScreenUtil.screenWidth / 3,

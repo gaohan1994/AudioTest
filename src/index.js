@@ -1,30 +1,25 @@
-import React, {useRef, useState, useEffect} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   StyleSheet,
   View,
   Text,
   StatusBar,
-  TouchableOpacity,
   PermissionsAndroid,
   Platform,
 } from 'react-native';
+
 import {useMount} from 'ahooks';
-import AudioRecord from './component/audio-record';
-import Websocket from './common/socket';
-import {API_URL, api_common} from './common/api';
-import {Overlay} from 'teaset';
-// import Button from './component/button';
 import ButtonView from './pages/view';
 import AudioPlayModal from './component/audio-play';
-import Toast from 'teaset/components/Toast/Toast';
-import Modal from 'react-native-modal';
-// import WebsocketDM from './common/socket-t';
+import {useDispatch, useSelector} from 'react-redux';
+import ConfigApi from './component/config-api';
 
-const App = () => {
-  const websocketRef = useRef(null);
-
+const App = (props) => {
   const [visible, setVisible] = useState(false);
   const [audioUrl, setAudioUrl] = useState('');
+
+  const state = useSelector((state) => state.apiStore);
+  const {send, query_url} = state;
 
   useMount(async () => {
     if (Platform.OS === 'android') {
@@ -34,72 +29,20 @@ const App = () => {
     }
   });
 
-  const onRecordData = (data) => {
-    const payload = {
-      ...api_common(),
-      token: 'token',
-      last: false,
-      vcn: 'xiaoyuan',
-      spd: 50,
-      vol: 50,
-      data: data,
-      type: 0,
-    };
-    const payloadString = JSON.stringify(payload);
-    console.log('payload', payload);
-    // const client = WebsocketDM.getInstance();
-    // console.log('client', client);
-    // client?.sendMessage(payloadString);
-    console.log(payloadString);
-    // console.log('websocketRef.current', websocketRef.current);
-    websocketRef.current?.send(payload);
-  };
-
-  const onopen = (event) => {
-    console.log('onopen');
-    Toast.info('socket 已连接');
-  };
-
-  const onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log('message data', data);
-  };
-
-  // const AudioOverlay = (
-  //   <Overlay.PullView
-  //     // modal={true}
-  //     side="left"
-  //     style={[{alignItems: 'center', justifyContent: 'center'}]}
-  //     ref={overlayRef}>
-  //     <AudioRecord
-  //       onRecordData={(data) => onRecordData(data)}
-  //       onClose={(audioFilePath) => {
-  //         if (audioFilePath) {
-  //           // console.log('audioFilePath', typeof audioFilePath);
-  //           // console.log('audioFilePath', audioFilePath);
-  //           setAudioUrl(audioFilePath);
-  //           setVisible(true);
-  //         }
-  //         overlayRef.current?.close();
-  //       }}
-  //     />
-  //   </Overlay.PullView>
-  // );
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#fff" />
       <View style={{flex: 1}}>
         <View style={styles.container}>
-          <View>
+          <View style={styles.content}>
             <Text>数字人App Demo</Text>
+            <Text>socket 地址：{send}</Text>
+            <Text>请求问题地址：{query_url}</Text>
+            <ConfigApi />
           </View>
           <ButtonView
-            onRecordData={(data) => onRecordData(data)}
             onClose={(audioFilePath) => {
               if (audioFilePath) {
-                // console.log('audioFilePath', typeof audioFilePath);
-                // console.log('audioFilePath', audioFilePath);
                 setAudioUrl(audioFilePath);
                 setVisible(true);
               }
@@ -112,23 +55,6 @@ const App = () => {
         visible={visible}
         setVisible={setVisible}
         url={audioUrl}
-      />
-      <Websocket
-        reconnect={true}
-        ref={websocketRef}
-        url={API_URL.send}
-        onOpen={(data) => {
-          console.log('onopen');
-          onopen(data);
-        }}
-        onMessage={(data) => {
-          console.log('onmessage');
-          onmessage(data);
-        }}
-        onClose={() => {
-          Toast.sad('socket 已关闭');
-          console.log('onclose');
-        }}
       />
     </View>
   );
@@ -162,6 +88,12 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
+  },
+  content: {
+    flex: 1,
+    paddingTop: 64,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
   },
 });
 

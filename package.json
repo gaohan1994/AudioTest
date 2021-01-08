@@ -20,6 +20,8 @@
     "react-native-modal": "^11.5.6",
     "react-native-sound": "^0.11.0",
     "react-native-webview": "^11.0.0",
+    "react-redux": "^7.2.2",
+    "redux": "^4.0.5",
     "teaset": "^0.7.5"
   },
   "devDependencies": {
