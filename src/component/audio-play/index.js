@@ -11,16 +11,16 @@ export default (props) => {
   const [audio, setAudio] = useState({});
 
   const onPlayAudio = () => {
-    console.log('url', url);
+    console.log('[音频存放地址]:', url);
     const sound = new Sound(url, '', (error) => {
       if (error) {
-        console.log('sound error:', error);
+        console.log('[音频播放组件报错信息]: ', error);
       }
 
       setTimeout(() => {
         sound.play((success) => {
+          console.log('[音频播放是否成功标识]:', success);
           if (success) {
-            console.log('successfully finished playing');
             Toast.success('播放完毕！');
             setVisible(false);
           } else {
@@ -57,7 +57,7 @@ export default (props) => {
               setVisible(false);
             }}
           />
-          <Button size="normal" title="播放" onPress={() => onPlayAudio()} />
+          <Button size="normal" title="播放" onPress={onPlayAudio} />
         </View>
       </View>
     </Modal>

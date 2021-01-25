@@ -1,16 +1,16 @@
 import {useSelector, useDispatch} from 'react-redux';
 
-// send: 'ws://182.119.128.3:60069/v1/send',
 export const API_URL = {
   send: 'ws://test.xfyousheng.com/vclip/v1/send',
   receive: 'ws://test.xfyousheng.com/vclip/v1/receive',
 };
 
-// http://182.119.145.103:9080/crsp-ar-dev/queryVoice.ajax
-// https://wepay.test.bankcomm.com/crsp-ar-dev/queryVoice.ajax
 const initState = {
   send: 'ws://182.119.128.3:60069/v1/send',
+  // send: 'ws://test.xfyousheng.com/vclip/v1/send',
+
   query_url: 'http://182.119.145.103:9080/crsp-ar-dev/queryVoice.ajax',
+  // query_url: 'https://wepay.test.bankcomm.com/crsp-ar-dev/queryVoice.ajax',
 };
 
 export const Api_Actions = {

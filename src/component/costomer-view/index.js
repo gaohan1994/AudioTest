@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {View, Text, StyleSheet, ScrollView} from 'react-native';
 import {ScreenUtil} from 'react-native-centerm-sdk';
 import {merge} from 'lodash';
+import moment from 'moment';
 
 class CostomerView extends React.Component {
   constructor(props) {
@@ -12,11 +13,12 @@ class CostomerView extends React.Component {
     };
   }
   componentDidMount() {
-    const timerId = setInterval(() => {
-      this.fetchList();
-    }, 3 * 1000);
+    // const timerId = setInterval(() => {
+    //   this.fetchList();
+    // }, 0.5 * 1000);
 
-    this.timer = timerId;
+    // this.timer = timerId;
+    this.fetchList();
   }
 
   componentWillUnmount() {
@@ -28,17 +30,41 @@ class CostomerView extends React.Component {
   fetchList = () => {
     const {queryQuestion} = this.props;
 
+    console.log('[开始时间]:', moment().format('HH:mm:ss'));
     if (queryQuestion) {
-      queryQuestion().then((result) => {
-        const {RSP_BODY} = result;
-        const {question} = RSP_BODY;
-        const {renderQuestionList} = this.state;
-        if (question) {
-          let nextQuestionList = merge([], renderQuestionList);
-          nextQuestionList = nextQuestionList.concat(question);
-          this.setState({renderQuestionList: nextQuestionList});
-        }
-      });
+      queryQuestion()
+        .then((result) => {
+          console.log('[请求问题结果result]:', result);
+          const {RSP_BODY} = result;
+          const {question, responseMessage} = RSP_BODY;
+
+          // 异常
+          if (!result) {
+            return;
+          }
+
+          // 超时重新请求
+          if (responseMessage === '获取超时') {
+            this.fetchList();
+            return;
+          }
+
+          // 有数据
+          const {renderQuestionList} = this.state;
+          if (question) {
+            let nextQuestionList = merge([], renderQuestionList);
+            nextQuestionList = nextQuestionList.concat(question);
+            this.setState({renderQuestionList: nextQuestionList});
+          }
+          // 长轮训如果有数据了之后立马发送下一个请求
+          this.fetchList();
+        })
+        .catch((error) => {
+          // 如果报错或者超时则重新请求
+          console.log('[报错时间]:', moment().format('HH:mm:ss'));
+          console.log('[请求问题报错error]:', error);
+          // this.fetchList();
+        });
     }
   };
 
@@ -56,7 +82,6 @@ class CostomerView extends React.Component {
                 return (
                   <Text key={index} style={styles.text}>
                     {item}
-                    {index}
                   </Text>
                 );
               })

@@ -3,7 +3,7 @@
  * @Author: centerm.gaohan
  * @Date: 2020-10-23 14:45:23
  * @Last Modified by: centerm.gaohan
- * @Last Modified time: 2021-01-08 15:41:12
+ * @Last Modified time: 2021-01-21 17:05:19
  */
 import React, {useState, useRef} from 'react';
 import {useMount} from 'ahooks';
@@ -53,18 +53,21 @@ const Audio = (props) => {
   const onRecordData = (data) => {
     const payload = {
       ...api_common(),
+      // base: {
+      //   appId: 'centerm',
+      //   version: '1.0',
+      //   timeStamp: `${new Date().valueOf()}`,
+      // },
       token: 'token',
       last: false,
       vcn: 'xiaoyuan',
       spd: 50,
       vol: 50,
-      data: data,
       type: 0,
+      data: data,
     };
     const payloadString = JSON.stringify(payload);
-    // console.log('payload', payload);
     console.log(payloadString);
-    // console.log('websocketRef.current', websocketRef.current);
     websocketRef.current?.send(payload);
   };
 
@@ -72,7 +75,7 @@ const Audio = (props) => {
   // 进入的时候开启
   useMount(() => {
     const options = {
-      sampleRate: 44100, // default 44100
+      sampleRate: 16000, // default 44100
       channels: 1, // 1 or 2, default 1
       bitsPerSample: 16, // 8 or 16, default 16
       audioSource: 6, // android only (see below)

@@ -7,12 +7,14 @@ import {
   PermissionsAndroid,
   Platform,
 } from 'react-native';
+import moment from 'moment';
 
 import {useMount} from 'ahooks';
 import ButtonView from './pages/view';
 import AudioPlayModal from './component/audio-play';
 import {useDispatch, useSelector} from 'react-redux';
 import ConfigApi from './component/config-api';
+import CostomerView from './component/costomer-view';
 
 const App = (props) => {
   const [visible, setVisible] = useState(false);
@@ -29,10 +31,19 @@ const App = (props) => {
     }
   });
 
+  const queryQuestion = () => {
+    return fetch(state.query_url, {
+      method: 'GET',
+    })
+      .then((res) => res.json())
+      .catch((error) => {});
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#fff" />
       <View style={{flex: 1}}>
+        <CostomerView queryQuestion={queryQuestion} />
         <View style={styles.container}>
           <View style={styles.content}>
             <Text>数字人App Demo</Text>
